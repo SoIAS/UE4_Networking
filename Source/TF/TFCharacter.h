@@ -20,6 +20,8 @@ class ATFCharacter : public ACharacter
 public:
 	ATFCharacter();
 
+	void Tick(float DeltaSeconds) override;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
 	float BaseTurnRate;
 
@@ -34,8 +36,23 @@ protected:
 	void LookUpAtRate(float Rate);
 	
 protected:
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	class ATFInteractable* GetInteractableInView() const;
+	void UpdateInteractableFocus();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Interactable")
+	void OnInteractableFocusChanged();
+	// todo, move the functions to correct positions
+
+	UPROPERTY(BlueprintReadOnly, Category = "Interactable")
+	ATFInteractable* CurrentlyFocused;
+	
+	void Use();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_Use();
+	
 public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const
 	{

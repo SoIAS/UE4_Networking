@@ -8,6 +8,12 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "DrawDebugHelpers.h"
+
+
+#include "World/TFInteractable.h"
+#include "Engine/Engine.h"
+
 
 ATFCharacter::ATFCharacter()
 {
@@ -33,6 +39,14 @@ ATFCharacter::ATFCharacter()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
+
+	// todo, move to begin play?
+	CurrentlyFocused = nullptr;
+}
+
+void ATFCharacter::Tick(float DeltaSeconds)
+{
+	UpdateInteractableFocus();
 }
 
 void ATFCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -48,6 +62,84 @@ void ATFCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputC
 	PlayerInputComponent->BindAxis("TurnRate", this, &ATFCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("LookUpRate", this, &ATFCharacter::LookUpAtRate);
+	
+	PlayerInputComponent->BindAction("Use", IE_Pressed, this, &ATFCharacter::Use);
+}
+
+ATFInteractable* ATFCharacter::GetInteractableInView() const
+{
+	if (!Controller)
+	{
+		return nullptr;
+	}
+
+	constexpr auto TraceLength = 1000;
+
+	FVector CameraPosition{};
+	FRotator CameraRotation{};
+	Controller->GetPlayerViewPoint(CameraPosition, CameraRotation);
+;
+	const FVector TraceEnd = CameraPosition + CameraRotation.Vector() * TraceLength;
+	const FCollisionQueryParams TraceParams{ "InteractableTrace", false, this };
+
+	FHitResult Result{};
+	GetWorld()->LineTraceSingleByChannel(Result, CameraPosition, TraceEnd, ECC_Visibility, TraceParams);
+
+	return Cast<ATFInteractable>(Result.GetActor());
+}
+
+void ATFCharacter::UpdateInteractableFocus()
+{
+	if (Controller && Controller->IsLocalController())
+	{
+		const auto Interactable = GetInteractableInView();
+		bool bRefocusPending{ CurrentlyFocused == nullptr };
+		bool bFocusChanged{ false };
+		if (CurrentlyFocused && CurrentlyFocused != Interactable)
+		{
+			CurrentlyFocused->OnFocusEnd();
+			bRefocusPending = true;
+			bFocusChanged = true;
+		}
+
+		CurrentlyFocused = Interactable;
+		if (CurrentlyFocused && bRefocusPending)
+		{
+			CurrentlyFocused->OnFocusBegin();
+			bFocusChanged = true;
+		}
+
+		/* We could also implement a blueprint implementable event that fires when OnFocusBegin and OnFocusEnd gets called */
+		if (bFocusChanged)
+		{
+			OnInteractableFocusChanged();
+		}
+	}
+}
+
+void ATFCharacter::Use()
+{
+	if (Role < ROLE_Authority)
+	{
+		Server_Use();
+		return;
+	}
+
+	if (const auto Interactable = GetInteractableInView())
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("USED CALLED"));
+		Interactable->OnUse(this);
+	}
+}
+
+void ATFCharacter::Server_Use_Implementation()
+{
+	Use();
+}
+
+bool ATFCharacter::Server_Use_Validate()
+{
+	return true;
 }
 
 

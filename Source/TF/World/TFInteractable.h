@@ -20,6 +20,11 @@ public:
 		return StaticMeshComponent;
 	}
 
+	const FName& GetInteractableName() const noexcept
+	{
+		return Name;
+	}
+
 	UFUNCTION(BlueprintCallable, Category = "Interactable")
 	virtual void OnFocusBegin();
 
@@ -27,14 +32,15 @@ public:
 	virtual void OnFocusEnd();
 
 	UFUNCTION(BlueprintCallable, Category = "Interactable")
-	virtual void OnUsed(APawn* UsedBy);
-
+	virtual void OnUse(APawn* UsedBy);
 	
 protected:
-	UPROPERTY(EditDefaultsOnly, Category="Visuals")
+	UPROPERTY(VisibleAnywhere, Category="Visuals")
 	UStaticMeshComponent* StaticMeshComponent;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Name")
-	FName Name;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Info")
+	FName Name; // Todo, Maybe change to string? Do we need runtime changing?
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Info")
+	FName InteractableText;
 };
