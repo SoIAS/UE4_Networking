@@ -20,10 +20,17 @@ public:
 	
 	void OnUse(APawn* Instigator) override;
 
+protected:
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	class USoundCue* PickupSound;
+	
 private:
 	UPROPERTY(ReplicatedUsing = OnRep_OnPickedUp)
 	bool bPickedUp;
 
 	UFUNCTION()
 	void OnRep_OnPickedUp();
+
+	UFUNCTION(Reliable, NetMulticast)
+	void PlayPickupSound();
 };

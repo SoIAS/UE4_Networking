@@ -4,6 +4,8 @@
 #include "TFPickup.h"
 #include "Engine/Engine.h"
 #include "UnrealNetwork.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 
 ATFPickup::ATFPickup()
 {
@@ -14,26 +16,31 @@ ATFPickup::ATFPickup()
 void ATFPickup::BeginPlay()
 {
 	// todo, shoould I check for role?
-	bPickedUp = false;
+	bPickedUp = false; // todo, remove, not used atm
 }
 
-void ATFPickup::OnUse(APawn* const UsedBy)
+void ATFPickup::OnUse(APawn* const Instigator)
 {
-	// recheck
-	if (IsPendingKill() || bPickedUp)
+	if (!Instigator || IsPendingKill())
 	{
 		return;
 	}
 
-	bPickedUp = true;
-
+	PlayPickupSound();
+	
+	// todo instigator->pickup(item);
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("OBJECT USED"));
 	Destroy();
 }
 
 void ATFPickup::OnRep_OnPickedUp()
 {
-	// e.g play sound
+	
+}
+
+void ATFPickup::PlayPickupSound_Implementation()
+{
+	UGameplayStatics::PlaySoundAtLocation(this, PickupSound, GetActorLocation());
 }
 
 void ATFPickup::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
