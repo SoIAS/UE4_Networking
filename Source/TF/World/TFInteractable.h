@@ -32,7 +32,7 @@ public:
 	virtual void OnFocusEnd();
 
 	UFUNCTION(BlueprintCallable, Category = "Interactable")
-	virtual void OnUse(APawn* UsedBy);
+	virtual void OnUse(APawn* InstigatorPawn);
 	
 protected:
 	UPROPERTY(VisibleAnywhere, Category="Visuals")

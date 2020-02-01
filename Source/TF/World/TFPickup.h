@@ -18,7 +18,7 @@ public:
 	ATFPickup();
 	void BeginPlay() override;
 	
-	void OnUse(APawn* Instigator) override;
+	void OnUse(APawn* InstigatorPawn) override;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Sound")

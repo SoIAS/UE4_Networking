@@ -19,9 +19,9 @@ void ATFPickup::BeginPlay()
 	bPickedUp = false; // todo, remove, not used atm
 }
 
-void ATFPickup::OnUse(APawn* const Instigator)
+void ATFPickup::OnUse(APawn* const InstigatorPawn)
 {
-	if (!Instigator || IsPendingKill())
+	if (!InstigatorPawn || IsPendingKill())
 	{
 		return;
 	}

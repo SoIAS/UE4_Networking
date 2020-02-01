@@ -28,7 +28,7 @@ void ATFInteractable::OnFocusEnd()
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Object unfocused"));
 }
 
-void ATFInteractable::OnUse(APawn* const /*Instigator*/)
+void ATFInteractable::OnUse(APawn* const /*InstigatorPawn*/)
 {
 	LowLevelFatalError(TEXT("Pure virtual function not implemented"));
 }
