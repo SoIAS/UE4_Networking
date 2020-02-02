@@ -6,9 +6,9 @@
 
 ATFGameMode::ATFGameMode()
 {
-	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/ThirdPersonCPP/Blueprints/ThirdPersonCharacter"));
-	if (PlayerPawnBPClass.Class)
-	{
-		DefaultPawnClass = PlayerPawnBPClass.Class;
-	}
+	//static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/ThirdPersonCPP/Blueprints/ThirdPersonCharacter"));
+	//if (PlayerPawnBPClass.Class)
+	//{
+	//	DefaultPawnClass = PlayerPawnBPClass.Class;
+	//}
 }

@@ -6,9 +6,8 @@
 #include "World/TFInteractable.h"
 #include "TFLamp.generated.h"
 
-/**
- * 
- */
+
+// Simple light without client side prediction for toggling
 UCLASS()
 class TF_API ATFLamp : public ATFInteractable
 {
@@ -25,7 +24,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Light")
 	class UPointLightComponent* PointLightComponent;
 
-	UPROPERTY(ReplicatedUsing = OnRep_IsLit)
+	UPROPERTY(Transient, ReplicatedUsing = OnRep_IsLit)
 	bool bIsLit;
 
 	UFUNCTION()

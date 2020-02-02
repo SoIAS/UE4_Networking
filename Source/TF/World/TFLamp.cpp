@@ -16,6 +16,9 @@ void ATFLamp::BeginPlay()
 	{
 		bIsLit = PointLightComponent->IsVisible();
 	}
+
+	// Update current state for late joining clients
+	ToggleLight();
 }
 
 void ATFLamp::OnUse(APawn* const /*InstigatorPawn*/)
