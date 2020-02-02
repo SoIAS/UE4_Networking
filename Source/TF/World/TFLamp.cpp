@@ -18,7 +18,7 @@ void ATFLamp::BeginPlay()
 	}
 
 	// Update current state for late joining clients
-	ToggleLight();
+	OnRep_IsLit();
 }
 
 void ATFLamp::OnUse(APawn* const /*InstigatorPawn*/)
@@ -26,21 +26,17 @@ void ATFLamp::OnUse(APawn* const /*InstigatorPawn*/)
 	bIsLit = !bIsLit;
 
 	// For someone who is playing on listening server
-	ToggleLight();
+	OnRep_IsLit();
 }
 
 void ATFLamp::OnRep_IsLit()
-{
-	ToggleLight();
-}
-
-void ATFLamp::ToggleLight() const
 {
 	if (PointLightComponent)
 	{
 		PointLightComponent->SetVisibility(bIsLit);
 	}
 }
+
 
 void ATFLamp::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {

@@ -7,7 +7,7 @@
 #include "TFLamp.generated.h"
 
 
-// Simple light without client side prediction for toggling
+// Simple UPointLight lamp
 UCLASS()
 class TF_API ATFLamp : public ATFInteractable
 {
@@ -28,7 +28,5 @@ protected:
 	bool bIsLit;
 
 	UFUNCTION()
-	virtual void OnRep_IsLit();
-
-	void ToggleLight() const;
+	void OnRep_IsLit();
 };
