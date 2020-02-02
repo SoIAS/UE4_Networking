@@ -23,6 +23,9 @@ public:
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Sound")
 	class USoundCue* PickupSound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Item")
+	TSubclassOf<class ATFItem> ItemClass;
 	
 private:
 	UPROPERTY(ReplicatedUsing = OnRep_OnPickedUp)

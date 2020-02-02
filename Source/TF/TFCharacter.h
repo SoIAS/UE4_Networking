@@ -52,6 +52,13 @@ protected:
 
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_Use();
+
+protected:
+	UPROPERTY(Transient, Replicated, BlueprintReadOnly)
+	class ATFItem* CurrentItem;
+
+public:
+	bool PickupItem(ATFItem* Item);
 	
 public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const

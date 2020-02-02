@@ -6,6 +6,8 @@
 #include "UnrealNetwork.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
+#include "Items/TFItem.h"
+#include "TFCharacter.h"
 
 ATFPickup::ATFPickup()
 {
@@ -21,14 +23,25 @@ void ATFPickup::BeginPlay()
 
 void ATFPickup::OnUse(APawn* const InstigatorPawn)
 {
-	if (!InstigatorPawn || IsPendingKill())
+	const auto TFPawn = Cast<ATFCharacter>(InstigatorPawn);
+	if (!TFPawn || IsPendingKill())
 	{
 		return;
 	}
 
-	PlayPickupSound();
+	// todo, check if there is space in inventory to pickup, before actually spawning
+	FActorSpawnParameters SpawnInfo{};
+	SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	ATFItem* const SpawnedItem = GetWorld()->SpawnActor<ATFItem>(ItemClass, SpawnInfo);
+
+	if(!TFPawn->PickupItem(SpawnedItem))
+	{
+		SpawnedItem->Destroy();
+		return;
+	}
 	
-	// todo instigator->pickup(item);
+	PlayPickupSound();
+
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("OBJECT USED"));
 	Destroy();
 }
@@ -45,5 +58,7 @@ void ATFPickup::PlayPickupSound_Implementation()
 
 void ATFPickup::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
 	DOREPLIFETIME(ATFPickup, bPickedUp);
 }

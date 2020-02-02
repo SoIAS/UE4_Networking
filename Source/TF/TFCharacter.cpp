@@ -13,6 +13,7 @@
 
 #include "World/TFInteractable.h"
 #include "Engine/Engine.h"
+#include "UnrealNetwork.h"
 
 
 ATFCharacter::ATFCharacter()
@@ -132,6 +133,25 @@ void ATFCharacter::Use()
 	}
 }
 
+bool ATFCharacter::PickupItem(ATFItem* Item)
+{	
+	if (Item && Role == ROLE_Authority)
+	{
+		if (CurrentItem)
+		{
+			return false;
+		}
+		
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("ItemSet"));
+
+		CurrentItem = Item;
+		return true;
+	}
+
+	return false;
+}
+
+
 void ATFCharacter::Server_Use_Implementation()
 {
 	Use();
@@ -175,4 +195,11 @@ void ATFCharacter::MoveRight(float Value)
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		AddMovementInput(Direction, Value);
 	}
+}
+
+void ATFCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME_CONDITION(ATFCharacter, CurrentItem, COND_OwnerOnly);
 }
