@@ -15,6 +15,8 @@
 #include "Engine/Engine.h"
 #include "UnrealNetwork.h"
 
+#include "World/TFDestroyable.h"
+
 
 ATFCharacter::ATFCharacter()
 {
@@ -131,6 +133,33 @@ void ATFCharacter::Use()
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("USED CALLED"));
 		Interactable->OnUse(this);
 	}
+	else if(const auto Destroyable = GetDestroyableInView())
+	{
+		Destroyable->TakeDamage(100, FDamageEvent{}, GetController(), this);
+	}
+}
+
+ATFDestroyable* ATFCharacter::GetDestroyableInView() const
+{
+	// simple copy paste from get interactable, todo
+	if (!Controller)
+	{
+		return nullptr;
+	}
+
+	constexpr auto TraceLength = 1000;
+
+	FVector CameraPosition{};
+	FRotator CameraRotation{};
+	Controller->GetPlayerViewPoint(CameraPosition, CameraRotation);
+	;
+	const FVector TraceEnd = CameraPosition + CameraRotation.Vector() * TraceLength;
+	const FCollisionQueryParams TraceParams{ "InteractableTrace", false, this };
+
+	FHitResult Result{};
+	GetWorld()->LineTraceSingleByChannel(Result, CameraPosition, TraceEnd, ECC_Visibility, TraceParams);
+
+	return Cast<ATFDestroyable>(Result.GetActor());
 }
 
 bool ATFCharacter::PickupItem(ATFItem* Item)

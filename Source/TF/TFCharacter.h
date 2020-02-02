@@ -57,6 +57,8 @@ protected:
 	UPROPERTY(Transient, Replicated, BlueprintReadOnly)
 	class ATFItem* CurrentItem;
 
+	class ATFDestroyable* GetDestroyableInView() const; // tmp
+	
 public:
 	bool PickupItem(ATFItem* Item);
 	
