@@ -6,14 +6,26 @@
 #include "GameFramework/Actor.h"
 #include "TFDestroyable.generated.h"
 
-UENUM(BlueprintType)
-enum class EDestroyableState : uint8
+USTRUCT(BlueprintType)
+struct FDestructibleState
 {
-	Intact,
-	Damaged,
-	Destroyed
+	GENERATED_BODY();
+
+	UPROPERTY(EditDefaultsOnly)
+	float Health;
+
+	UPROPERTY(EditDefaultsOnly)
+	class UStaticMesh* StaticMesh;
+
+	UPROPERTY(EditDefaultsOnly)
+	class USoundCue* TransitionSound;
+
+	UPROPERTY(EditDefaultsOnly)
+	class UParticleSystem* TransitionEffect;
+
 };
 
+// todo, rename to destructible
 UCLASS()
 class TF_API ATFDestroyable : public AActor
 {
@@ -27,31 +39,33 @@ public:
 		return Health;
 	}
 
-	FORCEINLINE EDestroyableState GetDestroyableState() const noexcept
-	{
-		return DestroyableState;
-	}
-
 	float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	
 protected:
+	void OnConstruction(const FTransform & Transform) override;
+	void PostInitializeComponents();
 	void BeginPlay() override;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float DefaultHealth;
+	UPROPERTY(VisibleAnywhere)
+	class UStaticMeshComponent* StaticMeshComponent;
+
+	UPROPERTY(EditDefaultsOnly)
+	TArray<FDestructibleState> DestructibleStates;
+
+	UPROPERTY(ReplicatedUsing = OnRep_CurrentState)
+	int CurrentState;
+
+	UFUNCTION()
+	void OnRep_CurrentState();
+
+	UFUNCTION(Reliable, NetMulticast)
+	void OnStateChange();
+
+	UPROPERTY(EditDefaultsOnly)
+	bool bDestroyOnZeroHealth; // todo
 
 	UPROPERTY(Replicated)
 	float Health;
 
-	UPROPERTY(ReplicatedUsing = OnRep_DestroyableState, BlueprintReadOnly)
-	EDestroyableState DestroyableState;
-
-	UFUNCTION()
-	void OnRep_DestroyableState();
-	
-	void UpdateDestroyableState();
-	void SetNewDestroyableState(EDestroyableState NewState);
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void OnDestroyableStateChanged();
+	void UpdateState();
 };

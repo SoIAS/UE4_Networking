@@ -4,11 +4,19 @@
 #include "TFDestroyable.h"
 #include "UnrealNetwork.h"
 
+#include "Engine/Engine.h"
+#include "Sound/SoundCue.h"
+#include "Kismet/GameplayStatics.h"
+#include "Components/StaticMeshComponent.h"
+
 ATFDestroyable::ATFDestroyable()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	DefaultHealth = 100;
+	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshCompoentn"));
+	SetRootComponent(StaticMeshComponent);
+	
+	CurrentState = 0;
 	
 	SetReplicates(true);
 }
@@ -19,13 +27,7 @@ float ATFDestroyable::TakeDamage(
 	AController* const EventInstigator,
 	AActor* const DamageCauser)
 {
-	if (Health <= 0.0f || DestroyableState == EDestroyableState::Destroyed)
-	{
-		return {};
-	}
-
-	// We are not healing the object, at least that's the consensus
-	if (DamageAmount < 0.0f)
+	if (Health <= 0.0f || DamageAmount < 0.0f)
 	{
 		return {};
 	}
@@ -33,9 +35,48 @@ float ATFDestroyable::TakeDamage(
 	const float DamageDealt = FMath::Min(Health, DamageAmount);
 	Health -= DamageDealt;
 
-	UpdateDestroyableState();
+	UpdateState();
+	if (bDestroyOnZeroHealth && Health == 0)
+	{
+		Destroy();
+	}
 
 	return DamageDealt;
+}
+
+void ATFDestroyable::OnConstruction(const FTransform & Transform)
+{
+	Super::OnConstruction(Transform);
+
+	OnRep_CurrentState();
+}
+
+void ATFDestroyable::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	// TODO, anyway to throw errors when bps gets compiled?
+	if (DestructibleStates.Num() == 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Empty destructible states"));
+		return;
+	}
+
+	// Obviously we could either look for next state in unsorted array or sort it
+	// For sorting, the array would need to be replicated
+	// For ease let's just print an error
+	float PreviousHealthValue = DestructibleStates[0].Health;
+	for (int i = 1; i < DestructibleStates.Num(); ++i)
+	{
+		const auto CurrentHealthValue = DestructibleStates[i].Health;
+		if (PreviousHealthValue <= DestructibleStates[i].Health)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Destructible states are not ordered by health"));
+			break;
+		}
+
+		PreviousHealthValue = CurrentHealthValue;
+	}
 }
 
 void ATFDestroyable::BeginPlay()
@@ -44,39 +85,46 @@ void ATFDestroyable::BeginPlay()
 
  	if(Role == ROLE_Authority)
  	{
-        Health = DefaultHealth;
+		if (CurrentState < DestructibleStates.Num())
+		{
+			Health = DestructibleStates[0].Health;
+		}
  	}
 
- 	// todo, set initial state?
-	OnRep_DestroyableState();
+	OnRep_CurrentState();
 }
 
-void ATFDestroyable::OnRep_DestroyableState()
+void ATFDestroyable::OnRep_CurrentState()
 {
-	OnDestroyableStateChanged();
-}
-
-void ATFDestroyable::UpdateDestroyableState()
-{
-	if (Health == DefaultHealth)
+	// Check in case of an empty destructible states
+	if (CurrentState < DestructibleStates.Num())
 	{
-		SetNewDestroyableState(EDestroyableState::Intact);
-	}
-	else if (Health == 0)
-	{
-		SetNewDestroyableState(EDestroyableState::Destroyed);
-	}
-	else
-	{
-		SetNewDestroyableState(EDestroyableState::Damaged);
+		StaticMeshComponent->SetStaticMesh(DestructibleStates[CurrentState].StaticMesh);
 	}
 }
 
-void ATFDestroyable::SetNewDestroyableState(EDestroyableState NewState)
+void ATFDestroyable::OnStateChange_Implementation()
 {
-	if (DestroyableState != NewState)
+	UGameplayStatics::PlaySoundAtLocation(this, DestructibleStates[0].TransitionSound, GetActorLocation());
+}
+
+void ATFDestroyable::UpdateState()
+{
+	int NextState = CurrentState + 1;
+	int NewState = CurrentState;
+	while (
+		NextState < DestructibleStates.Num() &&
+		DestructibleStates[NextState].Health >= Health)
 	{
-		DestroyableState = NewState;
+		NewState = NextState;
+		++NextState;
+	}
+
+	if (CurrentState != NewState)
+	{
+		CurrentState = NewState;
+		OnStateChange(); // spawn particle and sound only when state changes (do not spawn that for late joining players)
+		OnRep_CurrentState(); // for listening server
 	}
 }
 
@@ -84,6 +132,6 @@ void ATFDestroyable::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
+	DOREPLIFETIME(ATFDestroyable, CurrentState);
 	DOREPLIFETIME(ATFDestroyable, Health);
-	DOREPLIFETIME(ATFDestroyable, DestroyableState);
 }
