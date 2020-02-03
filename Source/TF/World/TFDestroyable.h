@@ -59,10 +59,10 @@ protected:
 	void OnRep_CurrentState();
 
 	UFUNCTION(Reliable, NetMulticast)
-	void OnStateChange();
+	void OnStateChange(int PreviousState);
 
 	UPROPERTY(EditDefaultsOnly)
-	bool bDestroyOnZeroHealth; // todo
+	bool bDestroyOnZeroHealth;
 
 	UPROPERTY(Replicated)
 	float Health;

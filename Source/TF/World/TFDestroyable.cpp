@@ -83,13 +83,13 @@ void ATFDestroyable::BeginPlay()
 {
 	Super::BeginPlay();
 
- 	if(Role == ROLE_Authority)
+ 	if (Role == ROLE_Authority)
  	{
 		if (CurrentState < DestructibleStates.Num())
 		{
 			Health = DestructibleStates[0].Health;
 		}
- 	}
+	}
 
 	OnRep_CurrentState();
 }
@@ -103,9 +103,10 @@ void ATFDestroyable::OnRep_CurrentState()
 	}
 }
 
-void ATFDestroyable::OnStateChange_Implementation()
+void ATFDestroyable::OnStateChange_Implementation(const int PreviousState)
 {
-	UGameplayStatics::PlaySoundAtLocation(this, DestructibleStates[0].TransitionSound, GetActorLocation());
+	UGameplayStatics::PlaySoundAtLocation(this, DestructibleStates[PreviousState].TransitionSound, GetActorLocation());
+	UGameplayStatics::SpawnEmitterAtLocation(this, DestructibleStates[PreviousState].TransitionEffect, GetActorLocation(), FRotator::ZeroRotator, true);
 }
 
 void ATFDestroyable::UpdateState()
@@ -122,8 +123,9 @@ void ATFDestroyable::UpdateState()
 
 	if (CurrentState != NewState)
 	{
+		// Using multicast for visuals since the object might get destroyed right after this call
+		OnStateChange(CurrentState); // spawn particle and sound only when state changes (do not spawn that for late joining players)
 		CurrentState = NewState;
-		OnStateChange(); // spawn particle and sound only when state changes (do not spawn that for late joining players)
 		OnRep_CurrentState(); // for listening server
 	}
 }
