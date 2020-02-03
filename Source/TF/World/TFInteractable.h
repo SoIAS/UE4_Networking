@@ -14,13 +14,12 @@ class TF_API ATFInteractable : public AActor
 public:	
 	ATFInteractable();
 
-	UFUNCTION(BlueprintCallable, Category = "Visuals")
 	FORCEINLINE UStaticMeshComponent* GetStaticMeshComponent() const
 	{
 		return StaticMeshComponent;
 	}
 
-	const FName& GetInteractableName() const noexcept
+	FORCEINLINE const FName& GetInteractableName() const noexcept
 	{
 		return Name;
 	}
@@ -35,7 +34,7 @@ public:
 	virtual void OnUse(APawn* InstigatorPawn);
 	
 protected:
-	UPROPERTY(VisibleAnywhere, Category="Visuals")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Visuals")
 	UStaticMeshComponent* StaticMeshComponent;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Info")
