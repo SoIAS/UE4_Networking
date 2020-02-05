@@ -143,6 +143,16 @@ void ATFCharacter::Use()
 	}
 }
 
+void ATFCharacter::Server_Use_Implementation()
+{
+	Use();
+}
+
+bool ATFCharacter::Server_Use_Validate()
+{
+	return true;
+}
+
 ATFDestroyable* ATFCharacter::GetDestroyableInView() const
 {
 	// simple copy paste from get interactable, todo
@@ -189,7 +199,7 @@ bool ATFCharacter::PickupItem(ATFItem* Item)
 
 void ATFCharacter::DropItem()
 {
-	if(Role < ROLE_Authority)
+	if (Role < ROLE_Authority)
 	{
 		Server_DropItem();
 		return;
@@ -222,18 +232,6 @@ bool ATFCharacter::Server_DropItem_Validate()
 {
 	return true;
 }
-
-
-void ATFCharacter::Server_Use_Implementation()
-{
-	Use();
-}
-
-bool ATFCharacter::Server_Use_Validate()
-{
-	return true;
-}
-
 
 void ATFCharacter::TurnAtRate(float Rate)
 {

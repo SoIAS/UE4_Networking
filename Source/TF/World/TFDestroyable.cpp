@@ -89,6 +89,7 @@ float ATFDestroyable::TakeDamage(
 	UpdateState();
 	if (bDestroyOnZeroHealth && Health == 0)
 	{
+		OnStateChange(CurrentState); // Play last state effects
 		Destroy();
 	}
 
