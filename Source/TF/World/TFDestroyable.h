@@ -22,7 +22,6 @@ struct FDestructibleState
 
 	UPROPERTY(EditDefaultsOnly)
 	class UParticleSystem* TransitionEffect;
-
 };
 
 // todo, rename to destructible
@@ -34,18 +33,26 @@ class TF_API ATFDestroyable : public AActor
 public:	
 	ATFDestroyable();
 
+	FORCEINLINE bool DestroyOnZeroHealth() const noexcept
+	{
+		return bDestroyOnZeroHealth;
+	}
+	
 	FORCEINLINE float GetHealth() const noexcept
 	{
 		return Health;
 	}
-
-	float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	
 protected:
-	void OnConstruction(const FTransform & Transform) override;
-	void PostInitializeComponents();
+	void OnConstruction(const FTransform& Transform) override;
+	void PostInitializeComponents() override;
 	void BeginPlay() override;
 
+public:
+	float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
+protected:
+	
 	UPROPERTY(VisibleAnywhere)
 	class UStaticMeshComponent* StaticMeshComponent;
 

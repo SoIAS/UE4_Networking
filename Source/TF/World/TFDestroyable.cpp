@@ -21,33 +21,11 @@ ATFDestroyable::ATFDestroyable()
 	SetReplicates(true);
 }
 
-float ATFDestroyable::TakeDamage(
-	const float DamageAmount,
-	FDamageEvent const& DamageEvent,
-	AController* const EventInstigator,
-	AActor* const DamageCauser)
-{
-	if (Health <= 0.0f || DamageAmount < 0.0f)
-	{
-		return {};
-	}
-
-	const float DamageDealt = FMath::Min(Health, DamageAmount);
-	Health -= DamageDealt;
-
-	UpdateState();
-	if (bDestroyOnZeroHealth && Health == 0)
-	{
-		Destroy();
-	}
-
-	return DamageDealt;
-}
-
-void ATFDestroyable::OnConstruction(const FTransform & Transform)
+void ATFDestroyable::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
+	// Automatically update the mesh in blueprints and engine's viewport to first state
 	OnRep_CurrentState();
 }
 
@@ -94,9 +72,31 @@ void ATFDestroyable::BeginPlay()
 	OnRep_CurrentState();
 }
 
+float ATFDestroyable::TakeDamage(
+	const float DamageAmount,
+	FDamageEvent const& /*DamageEvent*/,
+	AController* const /*EventInstigator*/,
+	AActor* const /*DamageCauser*/)
+{
+	if (Health <= 0.0f || DamageAmount < 0.0f)
+	{
+		return {};
+	}
+
+	const float DamageDealt = FMath::Min(Health, DamageAmount);
+	Health -= DamageDealt;
+
+	UpdateState();
+	if (bDestroyOnZeroHealth && Health == 0)
+	{
+		Destroy();
+	}
+
+	return DamageDealt;
+}
+
 void ATFDestroyable::OnRep_CurrentState()
 {
-	// Check in case of an empty destructible states
 	if (CurrentState < DestructibleStates.Num())
 	{
 		StaticMeshComponent->SetStaticMesh(DestructibleStates[CurrentState].StaticMesh);

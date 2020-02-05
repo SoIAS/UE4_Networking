@@ -16,7 +16,6 @@ class TF_API ATFPickup : public ATFInteractable
 
 public:
 	ATFPickup();
-	void BeginPlay() override;
 	
 	void OnUse(APawn* InstigatorPawn) override;
 
@@ -28,12 +27,6 @@ protected:
 	TSubclassOf<class ATFItem> ItemClass;
 	
 private:
-	UPROPERTY(ReplicatedUsing = OnRep_OnPickedUp)
-	bool bPickedUp;
-
-	UFUNCTION()
-	void OnRep_OnPickedUp();
-
 	UFUNCTION(Reliable, NetMulticast)
 	void PlayPickupSound();
 };

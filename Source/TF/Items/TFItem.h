@@ -14,6 +14,11 @@ class TF_API ATFItem : public AActor
 public:	
 	ATFItem();
 
+	const TSubclassOf<class ATFPickup>& GetPickupClass() const noexcept
+	{
+		return PickupClass;
+	}
+	
 protected:
 	void BeginPlay() override;
 
@@ -22,4 +27,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
 	FName Name;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Pickup")
+	TSubclassOf<class ATFPickup> PickupClass;
 };

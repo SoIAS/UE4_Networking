@@ -60,7 +60,14 @@ protected:
 	class ATFDestroyable* GetDestroyableInView() const; // tmp
 	
 public:
+	bool CanPickupItem() const noexcept;
 	bool PickupItem(ATFItem* Item);
+	
+protected:
+	void DropItem();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_DropItem();
 	
 public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const
@@ -73,4 +80,3 @@ public:
 		return FollowCamera;
 	}
 };
-

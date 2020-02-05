@@ -16,7 +16,9 @@
 #include "UnrealNetwork.h"
 
 #include "World/TFDestroyable.h"
-
+#include "Items/TFItem.h"
+#include "World/TFPickup.h"
+#include "TFStaticLibrary.h"
 
 ATFCharacter::ATFCharacter()
 {
@@ -67,6 +69,7 @@ void ATFCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputC
 	PlayerInputComponent->BindAxis("LookUpRate", this, &ATFCharacter::LookUpAtRate);
 	
 	PlayerInputComponent->BindAction("Use", IE_Pressed, this, &ATFCharacter::Use);
+	PlayerInputComponent->BindAction("DropItem", IE_Pressed, this, &ATFCharacter::DropItem);
 }
 
 ATFInteractable* ATFCharacter::GetInteractableInView() const
@@ -162,6 +165,11 @@ ATFDestroyable* ATFCharacter::GetDestroyableInView() const
 	return Cast<ATFDestroyable>(Result.GetActor());
 }
 
+bool ATFCharacter::CanPickupItem() const noexcept
+{
+	return CurrentItem == nullptr;
+}
+
 bool ATFCharacter::PickupItem(ATFItem* Item)
 {	
 	if (Item && Role == ROLE_Authority)
@@ -171,13 +179,47 @@ bool ATFCharacter::PickupItem(ATFItem* Item)
 			return false;
 		}
 		
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("ItemSet"));
-
 		CurrentItem = Item;
 		return true;
 	}
 
 	return false;
+}
+
+void ATFCharacter::DropItem()
+{
+	if(Role < ROLE_Authority)
+	{
+		Server_DropItem();
+		return;
+	}
+
+	if (CurrentItem && Controller)
+	{
+		// Simply dropping item at characters feet, we could also simulate physics for the item dropping
+		// But that would require a TFPickup to derive from AStaticMeshActor to properly replicate the physics and movement of static mesh
+		const FVector SpawnLocation = UTFStaticLibrary::GetDropItemLocation(*this, { this });
+
+		FActorSpawnParameters SpawnInfo{};
+		SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+		ATFPickup* const DroppedItem = GetWorld()->SpawnActor<ATFPickup>(CurrentItem->GetPickupClass(), SpawnLocation, FRotator::ZeroRotator, SpawnInfo);
+
+		if (DroppedItem)
+		{
+			CurrentItem->Destroy();
+			CurrentItem = nullptr;
+		}
+	}
+}
+
+void ATFCharacter::Server_DropItem_Implementation()
+{
+	DropItem();
+}
+
+bool ATFCharacter::Server_DropItem_Validate()
+{
+	return true;
 }
 
 
