@@ -40,6 +40,7 @@ ATFCharacter::ATFCharacter()
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->TargetArmLength = 300.0f;	
 	CameraBoom->bUsePawnControlRotation = true;
+	CameraBoom->SocketOffset = FVector{ 0,55,75 };
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
