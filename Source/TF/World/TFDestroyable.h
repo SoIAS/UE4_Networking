@@ -78,4 +78,7 @@ protected:
 	float Health;
 
 	void UpdateState();
+
+	UFUNCTION(BlueprintNativeEvent)
+	void OnDestroyedOrLastState();
 };

@@ -91,7 +91,15 @@ float ATFDestroyable::TakeDamage(
 	if (bDestroyOnZeroHealth && Health == 0)
 	{
 		OnStateChange(CurrentState); // Play last state effects
+		OnDestroyedOrLastState();
 		Destroy();
+	}
+	else if (!bDestroyOnZeroHealth && CurrentState == DestructibleStates.Num() - 1)
+	{
+		// This was last state and this object is not going to get be Destroy'ed(), 
+		// let's set the hp to 0, so this function is not going to pass initial check again
+		Health = 0;
+		OnDestroyedOrLastState();
 	}
 
 	return DamageDealt;
@@ -140,6 +148,11 @@ void ATFDestroyable::UpdateState()
 		CurrentState = NewState;
 		OnRep_CurrentState(); // for listening server
 	}
+}
+
+void ATFDestroyable::OnDestroyedOrLastState_Implementation()
+{
+
 }
 
 void ATFDestroyable::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
