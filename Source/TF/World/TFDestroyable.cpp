@@ -8,6 +8,7 @@
 #include "Sound/SoundCue.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/ArrowComponent.h"
 
 ATFDestroyable::ATFDestroyable()
 {
@@ -47,7 +48,7 @@ void ATFDestroyable::PostInitializeComponents()
 	for (int i = 1; i < DestructibleStates.Num(); ++i)
 	{
 		const auto CurrentHealthValue = DestructibleStates[i].Health;
-		if (PreviousHealthValue <= DestructibleStates[i].Health)
+		if (PreviousHealthValue <= CurrentHealthValue)
 		{
 			UE_LOG(LogTemp, Error, TEXT("Destructible states are not ordered by health"));
 			break;
@@ -106,8 +107,18 @@ void ATFDestroyable::OnRep_CurrentState()
 
 void ATFDestroyable::OnStateChange_Implementation(const int PreviousState)
 {
-	UGameplayStatics::PlaySoundAtLocation(this, DestructibleStates[PreviousState].TransitionSound, GetActorLocation());
-	UGameplayStatics::SpawnEmitterAtLocation(this, DestructibleStates[PreviousState].TransitionEffect, GetActorLocation(), FRotator::ZeroRotator, true);
+	const auto& State = DestructibleStates[PreviousState];
+
+	FVector SpawnLocation = GetActorLocation();
+	FRotator SpawnRotator = FRotator::ZeroRotator;
+	if (const auto EffectLocationComponent = Cast<UArrowComponent>(State.EffectLocationArrowComponent.GetComponent(this)))
+	{
+		SpawnLocation = EffectLocationComponent->GetComponentLocation();
+		SpawnRotator = EffectLocationComponent->GetComponentRotation();
+	}
+	
+	UGameplayStatics::PlaySoundAtLocation(this, State.TransitionSound, SpawnLocation);
+	UGameplayStatics::SpawnEmitterAtLocation(this, State.TransitionEffect, SpawnLocation, SpawnRotator, true);
 }
 
 void ATFDestroyable::UpdateState()

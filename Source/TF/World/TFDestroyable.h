@@ -22,6 +22,9 @@ struct FDestructibleState
 
 	UPROPERTY(EditDefaultsOnly)
 	class UParticleSystem* TransitionEffect;
+
+	UPROPERTY(EditDefaultsOnly)
+	FComponentReference EffectLocationArrowComponent;
 };
 
 // todo, rename to destructible
