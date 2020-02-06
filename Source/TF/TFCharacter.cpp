@@ -8,8 +8,6 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "DrawDebugHelpers.h"
-
 
 #include "World/TFInteractable.h"
 #include "Engine/Engine.h"
@@ -50,7 +48,7 @@ ATFCharacter::ATFCharacter()
 	CurrentlyFocusedDestructible = nullptr;
 }
 
-void ATFCharacter::Tick(float DeltaSeconds)
+void ATFCharacter::Tick(const float /*DeltaSeconds*/)
 {
 	UpdateInteractableFocus();
 	UpdateDestructibleFocus();
@@ -101,8 +99,8 @@ void ATFCharacter::UpdateInteractableFocus()
 	if (Controller && Controller->IsLocalController())
 	{
 		const auto Interactable = GetInteractableInView();
-		bool bRefocusPending{ CurrentlyFocused == nullptr };
-		bool bFocusChanged{ false };
+		bool bRefocusPending = CurrentlyFocused == nullptr;
+		bool bFocusChanged = false;
 		if (CurrentlyFocused && CurrentlyFocused != Interactable)
 		{
 			CurrentlyFocused->OnFocusEnd();
@@ -133,6 +131,7 @@ void ATFCharacter::Use()
 		return;
 	}
 
+	// TODO, single trace and then cast to actors
 	if (const auto Interactable = GetInteractableInView())
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("USED CALLED"));
@@ -167,7 +166,7 @@ ATFDestroyable* ATFCharacter::GetDestroyableInView() const
 	FVector CameraPosition{};
 	FRotator CameraRotation{};
 	Controller->GetPlayerViewPoint(CameraPosition, CameraRotation);
-	;
+
 	const FVector TraceEnd = CameraPosition + CameraRotation.Vector() * TraceLength;
 	const FCollisionQueryParams TraceParams{ "InteractableTrace", false, this };
 
@@ -203,8 +202,8 @@ void ATFCharacter::UpdateDestructibleFocus()
 	if (Controller && Controller->IsLocalController())
 	{
 		const auto Destructible = GetDestroyableInView();
-		bool bRefocusPending{ CurrentlyFocusedDestructible == nullptr };
-		bool bFocusChanged{ false };
+		bool bRefocusPending = CurrentlyFocusedDestructible == nullptr;
+		bool bFocusChanged = false;
 		if (CurrentlyFocusedDestructible && CurrentlyFocusedDestructible != Destructible)
 		{
 			CurrentlyFocusedDestructible->OnHealthChanged.Unbind();
