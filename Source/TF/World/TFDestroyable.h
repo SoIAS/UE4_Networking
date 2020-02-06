@@ -81,6 +81,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	bool bDestroyOnZeroHealth;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FText Name;
+	
 	UPROPERTY(ReplicatedUsing = OnRep_Health, BlueprintReadOnly)
 	float Health;
 
