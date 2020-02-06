@@ -6,12 +6,18 @@
 #include "GameFramework/Actor.h"
 #include "TFDestroyable.generated.h"
 
+
+// Delegate to notify players who looking at this object, that it's health changed, so we can update widget
+// Of course we could notify the widget about its current state in many ways
+// But I think using a delegate to notify ONLY when the actor is actually looking at this object, gives the best performance
+DECLARE_DELEGATE(OnHealthChangedDelegate);
+
 USTRUCT(BlueprintType)
 struct FDestructibleState
 {
 	GENERATED_BODY();
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float Health;
 
 	UPROPERTY(EditDefaultsOnly)
@@ -54,15 +60,16 @@ protected:
 public:
 	float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
-protected:
+	OnHealthChangedDelegate OnHealthChanged;
 	
+protected:
 	UPROPERTY(VisibleAnywhere)
 	class UStaticMeshComponent* StaticMeshComponent;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TArray<FDestructibleState> DestructibleStates;
 
-	UPROPERTY(ReplicatedUsing = OnRep_CurrentState)
+	UPROPERTY(ReplicatedUsing = OnRep_CurrentState, BlueprintReadOnly)
 	int CurrentState;
 
 	UFUNCTION()
@@ -74,8 +81,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	bool bDestroyOnZeroHealth;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing = OnRep_Health, BlueprintReadOnly)
 	float Health;
+
+	UFUNCTION()
+	void OnRep_Health();
 
 	void UpdateState();
 

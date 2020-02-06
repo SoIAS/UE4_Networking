@@ -63,6 +63,16 @@ public:
 	bool CanPickupItem() const noexcept;
 	bool PickupItem(ATFItem* Item);
 	
+
+protected:
+	UPROPERTY(BlueprintReadOnly, Category = "Destructible")
+	ATFDestroyable* CurrentlyFocusedDestructible;
+
+	void UpdateDestructibleFocus();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Destructible")
+	void OnDestructibleFocusChanged();
+
 protected:
 	void DropItem();
 

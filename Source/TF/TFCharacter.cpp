@@ -46,13 +46,14 @@ ATFCharacter::ATFCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
 
-	// todo, move to begin play?
 	CurrentlyFocused = nullptr;
+	CurrentlyFocusedDestructible = nullptr;
 }
 
 void ATFCharacter::Tick(float DeltaSeconds)
 {
 	UpdateInteractableFocus();
+	UpdateDestructibleFocus();
 }
 
 void ATFCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -195,6 +196,34 @@ bool ATFCharacter::PickupItem(ATFItem* Item)
 	}
 
 	return false;
+}
+
+void ATFCharacter::UpdateDestructibleFocus()
+{
+	if (Controller && Controller->IsLocalController())
+	{
+		const auto Destructible = GetDestroyableInView();
+		bool bRefocusPending{ CurrentlyFocusedDestructible == nullptr };
+		bool bFocusChanged{ false };
+		if (CurrentlyFocusedDestructible && CurrentlyFocusedDestructible != Destructible)
+		{
+			CurrentlyFocusedDestructible->OnHealthChanged.Unbind();
+			bRefocusPending = true;
+			bFocusChanged = true;
+		}
+
+		CurrentlyFocusedDestructible = Destructible;
+		if (CurrentlyFocusedDestructible && bRefocusPending)
+		{
+			CurrentlyFocusedDestructible->OnHealthChanged.BindUFunction(this, "OnDestructibleFocusChanged");
+			bFocusChanged = true;
+		}
+
+		if (bFocusChanged)
+		{
+			OnDestructibleFocusChanged();
+		}
+	}
 }
 
 void ATFCharacter::DropItem()

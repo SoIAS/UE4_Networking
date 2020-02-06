@@ -86,6 +86,7 @@ float ATFDestroyable::TakeDamage(
 
 	const float DamageDealt = FMath::Min(Health, DamageAmount);
 	Health -= DamageDealt;
+	OnRep_Health();
 
 	UpdateState();
 	if (bDestroyOnZeroHealth && Health == 0)
@@ -129,6 +130,11 @@ void ATFDestroyable::OnStateChange_Implementation(const int PreviousState)
 	UGameplayStatics::SpawnEmitterAtLocation(this, State.TransitionEffect, SpawnLocation, SpawnRotator, true);
 }
 
+void ATFDestroyable::OnRep_Health()
+{
+	OnHealthChanged.ExecuteIfBound();
+}
+
 void ATFDestroyable::UpdateState()
 {
 	int NextState = CurrentState + 1;
@@ -152,7 +158,7 @@ void ATFDestroyable::UpdateState()
 
 void ATFDestroyable::OnDestroyedOrLastState_Implementation()
 {
-
+	
 }
 
 void ATFDestroyable::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
