@@ -317,6 +317,8 @@ void ATFCharacter::DropItem()
 
 		if (DroppedItem)
 		{
+			// Lets play drop sound the same as the pickup one (just for the gist of it)
+			DroppedItem->NetMulticast_PlayPickupSound();
 			DestroyItem();
 		}
 	}

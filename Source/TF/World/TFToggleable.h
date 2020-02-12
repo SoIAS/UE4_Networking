@@ -14,10 +14,16 @@ class TF_API ATFToggleable : public ATFInteractable
 {
 	GENERATED_BODY()
 public:
+	ATFToggleable();
 	void BeginPlay() override;
 	void OnUsed(APawn* InstigatorPawn) override;
 
 protected:
+	void InitBasedOnIsToggled();
+
+	UPROPERTY(BlueprintReadOnly)
+	bool bInitFinished;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_IsToggled)
 	bool bIsToggled;
 

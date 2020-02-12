@@ -12,5 +12,11 @@ void ATFDestructibleContainer::OnDestroyedOrLastState_Implementation()
 
 	FActorSpawnParameters SpawnInfo{};
 	SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-	GetWorld()->SpawnActor<ATFPickup>(PickupClass, SpawnLocation, FRotator::ZeroRotator, SpawnInfo);
+	const auto DroppedItem = GetWorld()->SpawnActor<ATFPickup>(PickupClass, SpawnLocation, FRotator::ZeroRotator, SpawnInfo);
+
+	if (DroppedItem)
+	{
+		// Lets play drop sound the same as the pickup one (just for the gist of it)
+		DroppedItem->NetMulticast_PlayPickupSound();
+	}
 }

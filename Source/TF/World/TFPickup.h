@@ -26,7 +26,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Item")
 	TSubclassOf<class ATFItem> ItemClass;
 	
-private:
+public:
 	UFUNCTION(Reliable, NetMulticast)
 	void NetMulticast_PlayPickupSound();
 };
