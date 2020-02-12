@@ -72,26 +72,44 @@ void ATFCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputC
 	PlayerInputComponent->BindAction("DropItem", IE_Pressed, this, &ATFCharacter::DropItem);
 }
 
-ATFInteractable* ATFCharacter::GetInteractableInView() const
+AActor* ATFCharacter::GetActorInView() const
 {
 	if (!Controller)
 	{
 		return nullptr;
 	}
 
-	constexpr auto TraceLength = 1000;
+	constexpr auto TraceLength = 10000;
 
 	FVector CameraPosition{};
 	FRotator CameraRotation{};
 	Controller->GetPlayerViewPoint(CameraPosition, CameraRotation);
-;
+	
 	const FVector TraceEnd = CameraPosition + CameraRotation.Vector() * TraceLength;
-	const FCollisionQueryParams TraceParams{ "InteractableTrace", false, this };
+	const FCollisionQueryParams TraceParams{ "ActorInViewTrace", false, this };
 
 	FHitResult Result{};
 	GetWorld()->LineTraceSingleByChannel(Result, CameraPosition, TraceEnd, ECC_Visibility, TraceParams);
 
-	return Cast<ATFInteractable>(Result.GetActor());
+	return Result.GetActor();
+}
+
+ATFInteractable* ATFCharacter::GetInteractableInView() const
+{
+	return GetInteractableInView(GetActorInView());
+}
+
+ATFInteractable* ATFCharacter::GetInteractableInView(AActor* ActorInView) const
+{
+	if (const auto Interactable = Cast<ATFInteractable>(ActorInView))
+	{
+		if (Interactable->CanInteractWith(this))
+		{
+			return Interactable;
+		}
+	}
+
+	return nullptr;
 }
 
 void ATFCharacter::UpdateInteractableFocus()
@@ -137,7 +155,7 @@ void ATFCharacter::Use()
 	if (const auto Interactable = GetInteractableInView())
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("USED CALLED"));
-		Interactable->OnUse(this);
+		Interactable->OnUsed(this);
 	}
 	else if(const auto Destroyable = GetDestroyableInView())
 	{

@@ -17,7 +17,7 @@ class TF_API ATFPickup : public ATFInteractable
 public:
 	ATFPickup();
 	
-	void OnUse(APawn* InstigatorPawn) override;
+	void OnUsed(APawn* InstigatorPawn) override;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Sound")

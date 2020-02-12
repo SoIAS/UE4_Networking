@@ -20,7 +20,7 @@ void ATFItemReceiver::BeginPlay()
 	}
 }
 
-void ATFItemReceiver::OnUse(APawn* InstigatorPawn)
+void ATFItemReceiver::OnUsed(APawn* InstigatorPawn)
 {
 	if (IsCompleted())
 	{
@@ -51,7 +51,7 @@ void ATFItemReceiver::OnUse(APawn* InstigatorPawn)
 
 	CheckForCompleted();
 
-	Super::OnUse(InstigatorPawn);
+	Super::OnUsed(InstigatorPawn);
 }
 
 void ATFItemReceiver::CheckForCompleted()

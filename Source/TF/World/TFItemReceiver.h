@@ -31,7 +31,7 @@ protected:
 	void BeginPlay() override;
 
 public:
-	void OnUse(APawn* InstigatorPawn) override;
+	void OnUsed(APawn* InstigatorPawn) override;
 
 	const TArray<FRequiredItem>& GetRequiredItems() const noexcept
 	{

@@ -38,7 +38,10 @@ protected:
 protected:
 	void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	AActor* GetActorInView() const;
+	
 	class ATFInteractable* GetInteractableInView() const;
+	class ATFInteractable* GetInteractableInView(AActor* ActorInView) const;
 	void UpdateInteractableFocus();
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Interactable")

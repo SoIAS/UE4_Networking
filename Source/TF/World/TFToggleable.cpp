@@ -10,12 +10,12 @@ void ATFToggleable::BeginPlay()
 	OnRep_IsToggled();
 }
 
-void ATFToggleable::OnUse(APawn* const InstigatorPawn)
+void ATFToggleable::OnUsed(APawn* const InstigatorPawn)
 {
 	bIsToggled = !bIsToggled;
 	OnRep_IsToggled();
 
-	Super::OnUse(InstigatorPawn);
+	Super::OnUsed(InstigatorPawn);
 }
 
 void ATFToggleable::OnRep_IsToggled_Implementation()

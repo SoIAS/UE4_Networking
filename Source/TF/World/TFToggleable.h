@@ -15,7 +15,7 @@ class TF_API ATFToggleable : public ATFInteractable
 	GENERATED_BODY()
 public:
 	void BeginPlay() override;
-	void OnUse(APawn* InstigatorPawn) override;
+	void OnUsed(APawn* InstigatorPawn) override;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_IsToggled)

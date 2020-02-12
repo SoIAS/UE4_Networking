@@ -14,6 +14,8 @@ ATFInteractable::ATFInteractable()
 
 	Name = "Default Name";
 	ActionText = "";
+
+	MaxInteractionDistance = 200;
 	
 	SetReplicates(true);
 }
@@ -28,14 +30,14 @@ void ATFInteractable::OnFocusEnd()
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Object unfocused"));
 }
 
-void ATFInteractable::OnUse(APawn* const /*InstigatorPawn*/)
+void ATFInteractable::OnUsed(APawn* const /*InstigatorPawn*/)
 {
 	NetMulticast_OnUsed();
 }
 
-void ATFInteractable::NetMulticast_OnUsed_Implementation()
+bool ATFInteractable::CanInteractWith_Implementation(const APawn* const Pawn)
 {
-	OnUsedClientCallback.ExecuteIfBound();
+	return GetDistanceTo(Pawn) <= MaxInteractionDistance;
 }
 
 FString ATFInteractable::GetInteractableTooltipText_Implementation()
@@ -48,4 +50,9 @@ FString ATFInteractable::GetInteractableTooltipText_Implementation()
 
 	TooltipText += Name.ToString();
 	return TooltipText;
+}
+
+void ATFInteractable::NetMulticast_OnUsed_Implementation()
+{
+	OnUsedClientCallback.ExecuteIfBound();
 }

@@ -35,7 +35,10 @@ public:
 	virtual void OnFocusEnd();
 
 	UFUNCTION(BlueprintCallable, Category = "Interactable")
-	virtual void OnUse(APawn* InstigatorPawn);
+	virtual void OnUsed(APawn* InstigatorPawn);
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Interactable")
+	bool CanInteractWith(const APawn* Pawn);
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Display")
 	FString GetInteractableTooltipText();
@@ -52,6 +55,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Info")
 	FName Name;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Interaction")
+	float MaxInteractionDistance;
+	
 private:
 	UFUNCTION(Unreliable, NetMulticast)
 	void NetMulticast_OnUsed();

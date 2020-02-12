@@ -15,7 +15,7 @@ ATFPickup::ATFPickup()
 	GetStaticMeshComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 }
 
-void ATFPickup::OnUse(APawn* const InstigatorPawn)
+void ATFPickup::OnUsed(APawn* const InstigatorPawn)
 {
 	const auto TFPawn = Cast<ATFCharacter>(InstigatorPawn);
 	if (!TFPawn || IsPendingKill())
@@ -39,7 +39,7 @@ void ATFPickup::OnUse(APawn* const InstigatorPawn)
 	}
 
 	NetMulticast_PlayPickupSound();
-	Super::OnUse(InstigatorPawn);
+	Super::OnUsed(InstigatorPawn);
 
 	Destroy();
 }
