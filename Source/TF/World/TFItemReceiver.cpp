@@ -7,9 +7,22 @@
 #include "Items/TFItem.h"
 #include "UnrealNetwork.h"
 
+ATFItemReceiver::ATFItemReceiver()
+{
+	bIsCompleted = false;
+}
+
+void ATFItemReceiver::BeginPlay()
+{
+	if (Role == ROLE_Authority)
+	{
+		CheckForCompleted();
+	}
+}
+
 void ATFItemReceiver::OnUse(APawn* InstigatorPawn)
 {
-	if (RequiredItems.Num() == 0)
+	if (IsCompleted())
 	{
 		return;
 	}
@@ -20,18 +33,13 @@ void ATFItemReceiver::OnUse(APawn* InstigatorPawn)
 		return;
 	}
 
-	bool bWasItemInserted = false;
 	for (int i = 0; i < RequiredItems.Num(); ++i)
 	{
 		auto& RequiredItem = RequiredItems[i];
 		if (TFPawn->CurrentItem->IsA(RequiredItem.ItemClass))
 		{
-			// todo
-			TFPawn->CurrentItem = nullptr;
+			TFPawn->DestroyItem();
 			
-			bWasItemInserted = true;
-			OnItemInserted();
-
 			if (--RequiredItem.Count == 0)
 			{
 				RequiredItems.RemoveAt(i);
@@ -41,30 +49,16 @@ void ATFItemReceiver::OnUse(APawn* InstigatorPawn)
 		}
 	}
 
-	if (!bWasItemInserted)
+	CheckForCompleted();
+}
+
+void ATFItemReceiver::CheckForCompleted()
+{
+	if (RequiredItems.Num() == 0 && !IsCompleted())
 	{
-		OnItemNotInserted();
+		bIsCompleted = true;
+		OnRep_IsCompleted();
 	}
-
-	if (RequiredItems.Num() == 0)
-	{
-		OnCompleted();
-	}
-}
-
-void ATFItemReceiver::OnItemInserted_Implementation()
-{
-	
-}
-
-void ATFItemReceiver::OnItemNotInserted_Implementation()
-{
-	
-}
-
-void ATFItemReceiver::OnCompleted_Implementation()
-{
-	
 }
 
 void ATFItemReceiver::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -72,4 +66,5 @@ void ATFItemReceiver::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ATFItemReceiver, RequiredItems);
+	DOREPLIFETIME(ATFItemReceiver, bIsCompleted);
 }

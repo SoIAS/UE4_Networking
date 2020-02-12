@@ -225,6 +225,31 @@ void ATFCharacter::UpdateDestructibleFocus()
 	}
 }
 
+void ATFCharacter::DestroyItem()
+{
+	if (Role < ROLE_Authority)
+	{
+		Server_DestroyItem();
+		return;
+	}
+
+	if (CurrentItem)
+	{
+		CurrentItem->Destroy();
+		CurrentItem = nullptr;
+	}
+}
+
+void ATFCharacter::Server_DestroyItem_Implementation()
+{
+	DestroyItem();
+}
+
+bool ATFCharacter::Server_DestroyItem_Validate()
+{
+	return true;
+}
+
 void ATFCharacter::DropItem()
 {
 	if (Role < ROLE_Authority)
@@ -245,8 +270,7 @@ void ATFCharacter::DropItem()
 
 		if (DroppedItem)
 		{
-			CurrentItem->Destroy();
-			CurrentItem = nullptr;
+			DestroyItem();
 		}
 	}
 }

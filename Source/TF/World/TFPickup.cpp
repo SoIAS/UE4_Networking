@@ -38,13 +38,12 @@ void ATFPickup::OnUse(APawn* const InstigatorPawn)
 		return;
 	}
 
-	PlayPickupSound();
+	NetMulticast_PlayPickupSound();
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("OBJECT USED"));
 	Destroy();
 }
 
-void ATFPickup::PlayPickupSound_Implementation()
+void ATFPickup::NetMulticast_PlayPickupSound_Implementation()
 {
 	UGameplayStatics::PlaySoundAtLocation(this, PickupSound, GetActorLocation());
 }

@@ -28,5 +28,5 @@ protected:
 	
 private:
 	UFUNCTION(Reliable, NetMulticast)
-	void PlayPickupSound();
+	void NetMulticast_PlayPickupSound();
 };

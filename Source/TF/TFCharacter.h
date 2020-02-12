@@ -74,6 +74,12 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Destructible")
 	void OnDestructibleFocusChanged();
 
+public:
+	void DestroyItem();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_DestroyItem();
+
 protected:
 	void DropItem();
 

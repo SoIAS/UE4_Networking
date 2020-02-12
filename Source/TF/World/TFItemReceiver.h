@@ -25,18 +25,33 @@ class TF_API ATFItemReceiver : public ATFInteractable
 	GENERATED_BODY()
 
 public:
+	ATFItemReceiver();
+	
+protected:
+	void BeginPlay() override;
+
+public:
 	void OnUse(APawn* InstigatorPawn) override;
 
-	UFUNCTION(BlueprintNativeEvent)
-	void OnItemNotInserted();
-
-	UFUNCTION(BlueprintNativeEvent)
-	void OnItemInserted();
+	const TArray<FRequiredItem>& GetRequiredItems() const noexcept
+	{
+		return RequiredItems;
+	}
 	
-	UFUNCTION(BlueprintNativeEvent)
-	void OnCompleted();
+	bool IsCompleted() const noexcept
+	{
+		return bIsCompleted;
+	}
 
 protected:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly)
 	TArray<FRequiredItem> RequiredItems;
+
+	UPROPERTY(ReplicatedUsing = OnRep_IsCompleted, BlueprintReadOnly)
+	bool bIsCompleted;
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnRep_IsCompleted();
+
+	void CheckForCompleted();
 };
