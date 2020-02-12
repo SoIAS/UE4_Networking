@@ -2,37 +2,18 @@
 
 
 #include "TFLightSwitch.h"
-#include "UnrealNetwork.h"
 #include "Engine/Light.h"
 #include "Components/LightComponent.h"
 
-void ATFLightSwitch::BeginPlay()
+void ATFLightSwitch::OnRep_IsToggled_Implementation()
 {
-	OnRep_bIsLit();
-}
-
-void ATFLightSwitch::OnUse(APawn* const /*InstigatorPawn*/)
-{
-	bIsLit = !bIsLit;
-	OnRep_bIsLit();
-}
-
-void ATFLightSwitch::OnRep_bIsLit()
-{
+	Super::OnRep_IsToggled_Implementation();
+	
 	for (auto& LightActor : LightActors)
 	{
 		if (const auto LightComponent = LightActor->GetLightComponent())
 		{
-			LightComponent->SetVisibility(bIsLit);
+			LightComponent->SetVisibility(bIsToggled);
 		}
 	}
-	
-	OnLightToggled();
-}
-
-void ATFLightSwitch::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(ATFLightSwitch, bIsLit);
 }
