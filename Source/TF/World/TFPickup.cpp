@@ -39,6 +39,7 @@ void ATFPickup::OnUse(APawn* const InstigatorPawn)
 	}
 
 	NetMulticast_PlayPickupSound();
+	Super::OnUse(InstigatorPawn);
 
 	Destroy();
 }

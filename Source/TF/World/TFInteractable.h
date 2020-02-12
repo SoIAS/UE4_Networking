@@ -6,6 +6,9 @@
 #include "GameFramework/Actor.h"
 #include "TFInteractable.generated.h"
 
+
+DECLARE_DELEGATE(OnUsedDelegate);
+
 /* It would be better if interactable was an interface (that pickup and other stuff would implement), but for now I will leave it as is */
 UCLASS()
 class TF_API ATFInteractable : public AActor
@@ -36,6 +39,8 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Display")
 	FString GetInteractableTooltipText();
+
+	OnUsedDelegate OnUsedClientCallback;
 	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Visuals")
@@ -46,4 +51,8 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Info")
 	FName Name;
+
+private:
+	UFUNCTION(Unreliable, NetMulticast)
+	void NetMulticast_OnUsed();
 };

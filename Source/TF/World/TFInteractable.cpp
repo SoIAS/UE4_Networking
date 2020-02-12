@@ -30,7 +30,12 @@ void ATFInteractable::OnFocusEnd()
 
 void ATFInteractable::OnUse(APawn* const /*InstigatorPawn*/)
 {
-	LowLevelFatalError(TEXT("Pure virtual function not implemented"));
+	NetMulticast_OnUsed();
+}
+
+void ATFInteractable::NetMulticast_OnUsed_Implementation()
+{
+	OnUsedClientCallback.ExecuteIfBound();
 }
 
 FString ATFInteractable::GetInteractableTooltipText_Implementation()

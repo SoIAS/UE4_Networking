@@ -50,6 +50,8 @@ void ATFItemReceiver::OnUse(APawn* InstigatorPawn)
 	}
 
 	CheckForCompleted();
+
+	Super::OnUse(InstigatorPawn);
 }
 
 void ATFItemReceiver::CheckForCompleted()
