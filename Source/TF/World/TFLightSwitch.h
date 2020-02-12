@@ -16,5 +16,8 @@ protected:
 	UPROPERTY(EditInstanceOnly, Category = "Light")
 	TArray<class ALight*> LightActors;
 
+	UPROPERTY(EditAnywhere, Category = "Light")
+	TArray<FComponentReference> LightComponents;
+
 	void OnRep_IsToggled_Implementation() override;
 };
