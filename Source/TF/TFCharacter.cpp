@@ -44,7 +44,7 @@ ATFCharacter::ATFCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
 
-	CurrentlyFocused = nullptr;
+	CurrentlyFocusedInteractable = nullptr;
 	CurrentlyFocusedDestructible = nullptr;
 }
 
@@ -54,7 +54,41 @@ void ATFCharacter::Tick(const float /*DeltaSeconds*/)
 	UpdateDestructibleFocus();
 }
 
-void ATFCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
+void ATFCharacter::TurnAtRate(const float Rate)
+{
+	AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
+}
+
+void ATFCharacter::LookUpAtRate(const float Rate)
+{
+	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
+}
+
+void ATFCharacter::MoveForward(const float Value)
+{
+	if (Controller && Value != 0.0f)
+	{
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		AddMovementInput(Direction, Value);
+	}
+}
+
+void ATFCharacter::MoveRight(const float Value)
+{
+	if (Controller && Value != 0.0f)
+	{
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		AddMovementInput(Direction, Value);
+	}
+}
+
+void ATFCharacter::SetupPlayerInputComponent(UInputComponent* const PlayerInputComponent)
 {
 	check(PlayerInputComponent);
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
@@ -79,7 +113,7 @@ AActor* ATFCharacter::GetActorInView() const
 		return nullptr;
 	}
 
-	constexpr auto TraceLength = 10000;
+	constexpr auto TraceLength = 1000;
 
 	FVector CameraPosition{};
 	FRotator CameraRotation{};
@@ -99,7 +133,7 @@ ATFInteractable* ATFCharacter::GetInteractableInView() const
 	return GetInteractableInView(GetActorInView());
 }
 
-ATFInteractable* ATFCharacter::GetInteractableInView(AActor* ActorInView) const
+ATFInteractable* ATFCharacter::GetInteractableInView(AActor* const ActorInView) const
 {
 	if (const auto Interactable = Cast<ATFInteractable>(ActorInView))
 	{
@@ -117,21 +151,21 @@ void ATFCharacter::UpdateInteractableFocus()
 	if (Controller && Controller->IsLocalController())
 	{
 		const auto Interactable = GetInteractableInView();
-		bool bRefocusPending = CurrentlyFocused == nullptr;
+		bool bRefocusPending = CurrentlyFocusedInteractable == nullptr;
 		bool bFocusChanged = false;
-		if (CurrentlyFocused && CurrentlyFocused != Interactable)
+		if (CurrentlyFocusedInteractable && CurrentlyFocusedInteractable != Interactable)
 		{
-			CurrentlyFocused->OnFocusEnd();
-			CurrentlyFocused->OnUsedClientCallback.Unbind();
+			CurrentlyFocusedInteractable->OnFocusEnd();
+			CurrentlyFocusedInteractable->OnUsedClientCallback.Unbind();
 			bRefocusPending = true;
 			bFocusChanged = true;
 		}
 
-		CurrentlyFocused = Interactable;
-		if (CurrentlyFocused && bRefocusPending)
+		CurrentlyFocusedInteractable = Interactable;
+		if (CurrentlyFocusedInteractable && bRefocusPending)
 		{
-			CurrentlyFocused->OnFocusBegin();
-			CurrentlyFocused->OnUsedClientCallback.BindUFunction(this, "OnInteractableFocusChanged");
+			CurrentlyFocusedInteractable->OnFocusBegin();
+			CurrentlyFocusedInteractable->OnUsedClientCallback.BindUFunction(this, "OnInteractableFocusChanged");
 			bFocusChanged = true;
 		}
 
@@ -143,85 +177,22 @@ void ATFCharacter::UpdateInteractableFocus()
 	}
 }
 
-void ATFCharacter::Use()
+ATFDestroyable* ATFCharacter::GetDestructibleInView() const
 {
-	if (Role < ROLE_Authority)
-	{
-		Server_Use();
-		return;
-	}
-
-	// TODO, single trace and then cast to actors
-	if (const auto Interactable = GetInteractableInView())
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("USED CALLED"));
-		Interactable->OnUsed(this);
-	}
-	else if(const auto Destroyable = GetDestroyableInView())
-	{
-		Destroyable->TakeDamage(100, FDamageEvent{}, GetController(), this);
-	}
+	return GetDestructibleInView(GetActorInView());
 }
 
-void ATFCharacter::Server_Use_Implementation()
+ATFDestroyable* ATFCharacter::GetDestructibleInView(AActor* const ActorInView) const
 {
-	Use();
-}
-
-bool ATFCharacter::Server_Use_Validate()
-{
-	return true;
-}
-
-ATFDestroyable* ATFCharacter::GetDestroyableInView() const
-{
-	// simple copy paste from get interactable, todo
-	if (!Controller)
-	{
-		return nullptr;
-	}
-
-	constexpr auto TraceLength = 1000;
-
-	FVector CameraPosition{};
-	FRotator CameraRotation{};
-	Controller->GetPlayerViewPoint(CameraPosition, CameraRotation);
-
-	const FVector TraceEnd = CameraPosition + CameraRotation.Vector() * TraceLength;
-	const FCollisionQueryParams TraceParams{ "InteractableTrace", false, this };
-
-	FHitResult Result{};
-	GetWorld()->LineTraceSingleByChannel(Result, CameraPosition, TraceEnd, ECC_Visibility, TraceParams);
-
-	return Cast<ATFDestroyable>(Result.GetActor());
-}
-
-bool ATFCharacter::CanPickupItem() const noexcept
-{
-	return CurrentItem == nullptr;
-}
-
-bool ATFCharacter::PickupItem(ATFItem* Item)
-{	
-	if (Item && Role == ROLE_Authority)
-	{
-		if (CurrentItem)
-		{
-			return false;
-		}
-		
-		CurrentItem = Item;
-		return true;
-	}
-
-	return false;
+	return Cast<ATFDestroyable>(ActorInView);
 }
 
 void ATFCharacter::UpdateDestructibleFocus()
 {
+	// Copy paste from interactable, they should use some common base, but for this example, I am going to leave it as it is
 	if (Controller && Controller->IsLocalController())
 	{
-		const auto Destructible = GetDestroyableInView();
+		const auto Destructible = GetDestructibleInView();
 		bool bRefocusPending = CurrentlyFocusedDestructible == nullptr;
 		bool bFocusChanged = false;
 		if (CurrentlyFocusedDestructible && CurrentlyFocusedDestructible != Destructible)
@@ -243,6 +214,61 @@ void ATFCharacter::UpdateDestructibleFocus()
 			OnDestructibleFocusChanged();
 		}
 	}
+}
+
+void ATFCharacter::Use()
+{
+	if (Role < ROLE_Authority)
+	{
+		Server_Use();
+		return;
+	}
+
+	const auto ActorInView = GetActorInView();
+	if (const auto Interactable = GetInteractableInView(ActorInView))
+	{
+		Interactable->OnUsed(this);
+	}
+	else if(const auto Destroyable = GetDestructibleInView(ActorInView))
+	{
+		Destroyable->TakeDamage(100, FDamageEvent{}, GetController(), this);
+	}
+}
+
+void ATFCharacter::Server_Use_Implementation()
+{
+	Use();
+}
+
+bool ATFCharacter::Server_Use_Validate()
+{
+	return true;
+}
+
+bool ATFCharacter::HasItem() const noexcept
+{
+	return CurrentItem && CurrentItem->IsValidLowLevel();
+}
+
+bool ATFCharacter::CanPickupItem() const noexcept
+{
+	return CurrentItem == nullptr;
+}
+
+bool ATFCharacter::PickupItem(ATFItem* const Item)
+{	
+	if (Item && Role == ROLE_Authority)
+	{
+		if (CurrentItem)
+		{
+			return false;
+		}
+		
+		CurrentItem = Item;
+		return true;
+	}
+
+	return false;
 }
 
 void ATFCharacter::DestroyItem()
@@ -281,7 +307,6 @@ void ATFCharacter::DropItem()
 	if (CurrentItem && Controller)
 	{
 		// Simply dropping item at characters feet, we could also simulate physics for the item dropping
-		// But that would require a TFPickup to derive from AStaticMeshActor to properly replicate the physics and movement of static mesh
 		const FVector SpawnLocation = UTFStaticLibrary::GetDropItemLocation(*this, { this });
 
 		FActorSpawnParameters SpawnInfo{};
@@ -303,40 +328,6 @@ void ATFCharacter::Server_DropItem_Implementation()
 bool ATFCharacter::Server_DropItem_Validate()
 {
 	return true;
-}
-
-void ATFCharacter::TurnAtRate(float Rate)
-{
-	AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
-}
-
-void ATFCharacter::LookUpAtRate(float Rate)
-{
-	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
-}
-
-void ATFCharacter::MoveForward(float Value)
-{
-	if (Controller && Value != 0.0f)
-	{
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
-
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		AddMovementInput(Direction, Value);
-	}
-}
-
-void ATFCharacter::MoveRight(float Value)
-{
-	if (Controller && Value != 0.0f)
-	{
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
-	
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-		AddMovementInput(Direction, Value);
-	}
 }
 
 void ATFCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

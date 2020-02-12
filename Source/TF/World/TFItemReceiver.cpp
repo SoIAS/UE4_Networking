@@ -28,7 +28,7 @@ void ATFItemReceiver::OnUsed(APawn* InstigatorPawn)
 	}
 	
 	const auto TFPawn = Cast<ATFCharacter>(InstigatorPawn);
-	if (!TFPawn || !TFPawn->CurrentItem)
+	if (!TFPawn || !TFPawn->HasItem())
 	{
 		return;
 	}
@@ -36,10 +36,9 @@ void ATFItemReceiver::OnUsed(APawn* InstigatorPawn)
 	for (int i = 0; i < RequiredItems.Num(); ++i)
 	{
 		auto& RequiredItem = RequiredItems[i];
-		if (TFPawn->CurrentItem->IsA(RequiredItem.ItemClass))
+		if (TFPawn->GetCurrentItem()->IsA(RequiredItem.ItemClass))
 		{
 			TFPawn->DestroyItem();
-			
 			if (--RequiredItem.Count == 0)
 			{
 				RequiredItems.RemoveAt(i);
@@ -50,7 +49,6 @@ void ATFItemReceiver::OnUsed(APawn* InstigatorPawn)
 	}
 
 	CheckForCompleted();
-
 	Super::OnUsed(InstigatorPawn);
 }
 
