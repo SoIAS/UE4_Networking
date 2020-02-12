@@ -13,6 +13,16 @@ class ATFGameMode : public AGameModeBase
 
 public:
 	ATFGameMode();
+	
+protected:
+	void BeginPlay() override;
+
+	AActor* ChoosePlayerStart_Implementation(AController* Player) override;
+
+	UPROPERTY()
+	TArray<AActor*> PlayerStarts;
+
+	int CurrentPlayerStart;
 };
 
 

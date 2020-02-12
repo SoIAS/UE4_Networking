@@ -19,6 +19,7 @@ struct FRequiredItem
 };
 
 // ItemReceiver for lack of the better word atm
+// bIsCompleted is toggled after object receives all required items
 UCLASS()
 class TF_API ATFItemReceiver : public ATFInteractable
 {
