@@ -48,8 +48,10 @@ ATFCharacter::ATFCharacter()
 	CurrentlyFocusedDestructible = nullptr;
 }
 
-void ATFCharacter::Tick(const float /*DeltaSeconds*/)
+void ATFCharacter::Tick(const float DeltaSeconds)
 {
+	Super::Tick(DeltaSeconds);
+	
 	UpdateInteractableFocus();
 	UpdateDestructibleFocus();
 }
