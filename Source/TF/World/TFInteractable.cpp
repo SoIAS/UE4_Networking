@@ -13,7 +13,7 @@ ATFInteractable::ATFInteractable()
 	SetRootComponent(GetStaticMeshComponent());
 
 	Name = "Default Name";
-	InteractableText = "";
+	ActionText = "";
 	
 	SetReplicates(true);
 }
@@ -31,4 +31,16 @@ void ATFInteractable::OnFocusEnd()
 void ATFInteractable::OnUse(APawn* const /*InstigatorPawn*/)
 {
 	LowLevelFatalError(TEXT("Pure virtual function not implemented"));
+}
+
+FString ATFInteractable::GetInteractableTooltipText_Implementation()
+{
+	FString TooltipText{};
+	if (ActionText.GetStringLength() != 0)
+	{
+		TooltipText = ActionText.ToString() + ' ';
+	}
+
+	TooltipText += Name.ToString();
+	return TooltipText;
 }

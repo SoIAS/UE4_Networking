@@ -136,6 +136,8 @@ void ATFCharacter::Use()
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("USED CALLED"));
 		Interactable->OnUse(this);
+
+		// TODO, update tooltip info (since it can change when someone is looking at it) -- not important atm
 	}
 	else if(const auto Destroyable = GetDestroyableInView())
 	{

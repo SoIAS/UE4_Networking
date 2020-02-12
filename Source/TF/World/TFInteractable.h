@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "TFInteractable.generated.h"
 
+/* It would be better if interactable was an interface (that pickup and other stuff would implement), but for now I will leave it as is */
 UCLASS()
 class TF_API ATFInteractable : public AActor
 {
@@ -32,14 +33,17 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Interactable")
 	virtual void OnUse(APawn* InstigatorPawn);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Display")
+	FString GetInteractableTooltipText();
 	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Visuals")
 	UStaticMeshComponent* StaticMeshComponent;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Info")
-	FName Name; // Todo, Maybe change to string? Do we need runtime changing?
-
+	FName ActionText;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Info")
-	FName InteractableText;
+	FName Name;
 };
