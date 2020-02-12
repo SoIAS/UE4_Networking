@@ -54,6 +54,7 @@ protected:
 	void Server_Use();
 
 protected:
+public: // todo
 	UPROPERTY(Transient, Replicated, BlueprintReadOnly)
 	class ATFItem* CurrentItem;
 
