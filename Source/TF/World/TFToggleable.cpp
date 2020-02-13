@@ -4,17 +4,12 @@
 #include "TFToggleable.h"
 #include "UnrealNetwork.h"
 
-ATFToggleable::ATFToggleable()
-{
-	bInitFinished = false;
-}
-
 void ATFToggleable::BeginPlay()
 {
 	Super::BeginPlay();
 	
 	// Update to the initial state of bIsToggled (set per instance basis) on both server and clients
-	InitBasedOnIsToggled();
+	OnRep_IsToggled();
 }
 
 void ATFToggleable::OnUsed(APawn* const InstigatorPawn)
@@ -23,15 +18,6 @@ void ATFToggleable::OnUsed(APawn* const InstigatorPawn)
 	OnRep_IsToggled();
 
 	Super::OnUsed(InstigatorPawn);
-}
-
-void ATFToggleable::InitBasedOnIsToggled()
-{
-	// Just a hack, could be easily replaced with multicast
-	// this boolean wouldn't be necessary if we were using multicast called in OnUsed to show particle effects etc
-	// But, since we are doing it this way, lets make sure effects are played only when init was done
-	OnRep_IsToggled();
-	bInitFinished = true;
 }
 
 void ATFToggleable::OnRep_IsToggled_Implementation()

@@ -59,6 +59,10 @@ protected:
 	float MaxInteractionDistance;
 	
 private:
-	UFUNCTION(Unreliable, NetMulticast)
+	UFUNCTION(Reliable, NetMulticast)
 	void NetMulticast_OnUsed();
+
+protected:
+	UFUNCTION(BlueprintImplementableEvent)
+	void Blueprint_NetMulticast_OnUsed();
 };
