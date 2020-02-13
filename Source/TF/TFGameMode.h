@@ -15,10 +15,9 @@ public:
 	ATFGameMode();
 	
 protected:
-	void BeginPlay() override;
-
 	AActor* ChoosePlayerStart_Implementation(AController* Player) override;
 
+private:
 	UPROPERTY()
 	TArray<AActor*> PlayerStarts;
 

@@ -22,12 +22,11 @@ ATFInteractable::ATFInteractable()
 
 void ATFInteractable::OnFocusBegin()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("Object focused"));
+	// In case we want to add custom stencil/outline
 }
 
 void ATFInteractable::OnFocusEnd()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Object unfocused"));
 }
 
 void ATFInteractable::OnUsed(APawn* const /*InstigatorPawn*/)

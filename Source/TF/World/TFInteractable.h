@@ -10,7 +10,7 @@
 DECLARE_DELEGATE(OnUsedDelegate);
 
 /* It would be better if interactable was an interface (that pickup and other stuff would implement), but for now I will leave it as is */
-UCLASS()
+UCLASS(Abstract)
 class TF_API ATFInteractable : public AActor
 {
 	GENERATED_BODY()

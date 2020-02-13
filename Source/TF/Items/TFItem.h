@@ -6,7 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "TFItem.generated.h"
 
-UCLASS()
+UCLASS(Abstract)
 class TF_API ATFItem : public AActor
 {
 	GENERATED_BODY()

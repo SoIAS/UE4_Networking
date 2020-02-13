@@ -34,7 +34,7 @@ struct FDestructibleState
 };
 
 // todo, rename to destructible
-UCLASS()
+UCLASS(Abstract)
 class TF_API ATFDestroyable : public AActor
 {
 	GENERATED_BODY()

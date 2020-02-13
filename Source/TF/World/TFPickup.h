@@ -9,7 +9,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Abstract)
 class TF_API ATFPickup : public ATFInteractable
 {
 	GENERATED_BODY()

@@ -11,18 +11,18 @@ ATFGameMode::ATFGameMode()
 	CurrentPlayerStart = 0;
 }
 
-void ATFGameMode::BeginPlay()
-{
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerStart::StaticClass(), PlayerStarts);
-}
-
 // Simply iterate over all player starts and choose a next one, so we don't get two player at the same start even if other starts are not used
-// Doesn't work with listening server
 AActor* ATFGameMode::ChoosePlayerStart_Implementation(AController* const Player)
-{
+{	
 	if (PlayerStarts.Num() == 0)
 	{
-		return Super::ChoosePlayerStart_Implementation(Player);
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerStart::StaticClass(), PlayerStarts);
+
+		// if still empty
+		if (PlayerStarts.Num() == 0)
+		{
+			return Super::ChoosePlayerStart_Implementation(Player);
+		}
 	}
 
 	if (CurrentPlayerStart >= PlayerStarts.Num())
