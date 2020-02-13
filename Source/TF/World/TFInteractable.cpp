@@ -53,6 +53,5 @@ FString ATFInteractable::GetInteractableTooltipText_Implementation()
 
 void ATFInteractable::NetMulticast_OnUsed_Implementation()
 {
-	OnUsedClientCallback.ExecuteIfBound();
 	Blueprint_NetMulticast_OnUsed();
 }

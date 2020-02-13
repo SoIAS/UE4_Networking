@@ -22,7 +22,7 @@ void ATFToggleable::OnUsed(APawn* const InstigatorPawn)
 
 void ATFToggleable::OnRep_IsToggled_Implementation()
 {
-	
+	OnUsedClientCallback.ExecuteIfBound();
 }
 
 void ATFToggleable::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
