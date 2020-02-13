@@ -14,6 +14,8 @@ ATFItemReceiver::ATFItemReceiver()
 
 void ATFItemReceiver::BeginPlay()
 {
+	Super::BeginPlay();
+	
 	if (Role == ROLE_Authority)
 	{
 		CheckForCompleted();
